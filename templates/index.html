@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Stream</title>
+</head>
+<body>
+    <h1>Project EDITH</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <div id="apiResponse"></div>
+    <button id="capture">Capture Frame</button>
+
+    <script>
+        var video = document.querySelector("#video");
+
+        // Prompt user to select a media stream, pass to video element, then play
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                video.play();
+            });
+
+        document.getElementById("capture").onclick = function() {
+            document.getElementById('apiResponse').innerText = ''
+            
+            var canvas = document.createElement("canvas");
+            canvas.width = 640;
+            canvas.height = 480;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            var data = canvas.toDataURL('image/jpeg');
+
+            // Send this data to Flask server
+            fetch("/process_frame", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ "image": data.split(',')[1] }), // Send Base64 encoded image data
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Response from OpenAI:", data);
+                document.getElementById('apiResponse').innerText = data.response;
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                document.getElementById('apiResponse').innerText = 'Error: ' + error.toString();
+            });
+        };
+    </script>
+</body>
+</html>

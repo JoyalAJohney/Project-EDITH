@@ -1,0 +1,12 @@
+version: '2.1'
+services:
+  ollama:
+    container_name: vision-model
+    build: ./llm-model
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+volumes:
+  ollama_data:

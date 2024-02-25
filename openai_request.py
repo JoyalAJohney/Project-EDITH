@@ -46,6 +46,7 @@ def upload_image_and_ask(image_path):
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
 
     response_data = response.json()
+    print(response_data)
     if 'choices' in response_data and len(response_data['choices']) > 0:
         answer = response_data['choices'][0]['message']['content']
         return answer

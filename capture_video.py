@@ -2,13 +2,14 @@ import cv2
 import os
 import datetime
 import threading
-from openai_request import upload_image_and_ask
+import base64
+from ollama_request import upload_image_and_ask
 
 
 
 # Save screenshot and call OpenAI
 
-def process_image(frame):
+def process_image(base64_image):
     curr_dir = os.getcwd()
     screenshot_dir = "screenshots"
 
@@ -21,17 +22,21 @@ def process_image(frame):
     filename = f'screenshot_{timestamp}.png'
     directory = os.path.join(full_dir, filename)
 
-    cv2.imwrite(directory, frame)
+    # Decode the base64 image
+    image_data = base64.b64decode(base64_image)
+    with open(directory, 'wb') as file:
+        file.write(image_data)
+
     print(f'Screenshot saved as {directory}')
 
     # Call OpenAI API
     response = upload_image_and_ask(directory)
-    print("\n" + response)
+    return response
 
 
 
 def capture_screenshot():
-    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture(0)
 
     while True:
         ret, frame = cap.read()
